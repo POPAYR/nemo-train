@@ -19,6 +19,14 @@ output/s2_L24c   GPU 2,7 双卡   阶段一:L=24 续训
   日志   output/_logs/active/s2_L24c.log
   watcher 独立进程 tool_watch/watch_s2.sh → s2_L24c.watch（不依赖 Claude 会话）
 ```
+**🔀 双机工作流（2026-09-28 起，详见 `docs/REMOTE_SETUP.md` 和 `docs/decisions/2026-09-28_two_machine_workflow.md`）**
+- 这台（ps）只写代码、做分析，实验放到公司内网的实验机上跑。两边网络不通：代码走 GitHub 私有仓库（这台 push，那台 pull），
+  结果靠用户带回结果包（`tools/ingest_results.sh` 导入到 `inbox/`），或直接贴 `SUMMARY.md`。
+- 新实验一律写成 `exps/<日期>_<名字>.sh`，由 `remote/run_exp.sh` 启动；所有路径都用 `XP("XN_*")` / `${oc.env:XN_*,...}`，不要再写死机器路径。
+- 本地已提交 `445276a`；`upstream`（bytedance）已禁止推送，**等用户给出私有仓库地址后设为 origin 并推送**。
+- 待在实验机上跑的第一个实验：`exps/20260928_L64ft2.sh`（64 帧微调的恒定 lr 续训 + 退火 + 评测），本机因磁盘满没跑成。
+- 本机磁盘：旧 MEAD（1.2T）已删，剩约 1.2T。
+
 **📍 状态（2026-09-27）**：退火（09-25 00:03）与 L64 微调 `output/s2_L64ft`（09-25 11:04，2000 步，`[done]`）**均正常结束**，GPU 2/7 已空。
 - 编排按"EMA vmse 最低"选了 `s2_L24c_anneal/step_1000`（lr 仍 8.6e-5，**并非真正退火完**）；L64ft 从它起步。
 - 退火评测（20 clip，`teacher_cmp/L24anneal_s1000/`）：配对/FID 与退火前持平，内部运动 2.082→2.228（GT 2.204）。
