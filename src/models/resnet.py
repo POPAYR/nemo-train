@@ -235,7 +235,14 @@ class ResnetBlock3D(nn.Module):
         hidden_states = self.conv1(hidden_states)
 
         if temb is not None:
-            temb = self.time_emb_proj(self.nonlinearity(temb))[:, :, None, None, None]
+            temb = self.time_emb_proj(self.nonlinearity(temb))
+            if temb.shape[0] == input_tensor.shape[0]:
+                temb = temb[:, :, None, None, None]                 # [B,D] → 全帧共享
+            else:
+                # ★ 逐帧 temb:[B*F,D](b 在外)→ [B,D,F,1,1],沿帧维逐帧生效。
+                #   dim=1 仍是通道维,scale_shift 的 chunk 不受影响。
+                _B, _F = input_tensor.shape[0], input_tensor.shape[2]
+                temb = temb.reshape(_B, _F, -1).permute(0, 2, 1)[:, :, :, None, None]
 
         if temb is not None and self.time_embedding_norm == "default":
             hidden_states = hidden_states + temb

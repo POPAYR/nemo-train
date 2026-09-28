@@ -12,6 +12,8 @@
 
 import argparse
 import os
+import sys
+sys.path.append("/media/ps/ssd5/ayr/x-nemo-inference")
 from datetime import datetime
 import mediapipe as mp
 import numpy as np
@@ -248,6 +250,7 @@ def main(args):
 
     vae = AutoencoderKLTemporalDecoder.from_pretrained(
         config.vae_path,
+        weight_dtype = weight_dtype,
     ).to(device, dtype=weight_dtype)
 
     infer_config = OmegaConf.load(config.inference_config)

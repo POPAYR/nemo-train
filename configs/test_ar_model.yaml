@@ -1,0 +1,15 @@
+text_encoder_path: ${oc.env:XN_PRETRAINED,/media/ps/ssd5/ayr/pretrained}/umt5-base
+audio_encoder_path: ${oc.env:XN_PRETRAINED,/media/ps/ssd5/ayr/pretrained}/wav2vec2-base-960h
+pretrained_base_model_path: "${oc.env:XN_PRETRAINED,/media/ps/ssd5/ayr/pretrained}/sd-image-variations-diffusers"
+image_encoder_path: "${oc.env:XN_PRETRAINED,/media/ps/ssd5/ayr/pretrained}/sd-image-variations-diffusers/image_encoder"
+vae_path: "${oc.env:XN_PRETRAINED,/media/ps/ssd5/ayr/pretrained}/stable-video-diffusion-img2vid/vae"
+
+inference_config: "${oc.env:XN_REPO,/media/ps/ssd5/ayr/x-nemo-inference}/configs/inference/inference_xnemo_stage2.yaml"
+
+denoising_unet_path: "${oc.env:XN_PRETRAINED,/media/ps/ssd5/ayr/pretrained}/xnemo_ckpt/xnemo_denoising_unet.pth"
+temporal_module_path: "${oc.env:XN_PRETRAINED,/media/ps/ssd5/ayr/pretrained}/xnemo_ckpt/xnemo_temporal_module.pth"
+
+depth: 12
+diffloss_depth: 4
+
+use_lcm: true

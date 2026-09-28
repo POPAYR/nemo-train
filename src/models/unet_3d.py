@@ -494,8 +494,16 @@ class UNet3DConditionModel(ModelMixin, ConfigMixin):
         elif len(timesteps.shape) == 0:
             timesteps = timesteps[None].to(sample.device)
 
-        # broadcast to batch dimension in a way that's compatible with ONNX/Core ML
-        timesteps = timesteps.expand(sample.shape[0])
+        # ★ 逐帧 timestep 支持:传入 [B,F] 或 [B*F] 时每帧独立 time embedding。
+        #   block-causal 蒸馏要求块间 σ 不同(Self-Forcing ode_regression._prepare_generator_input,
+        #   uniform_timestep=False),且推理时"历史干净(σ=0)+当前块带噪"本身就是逐帧 σ。
+        #   temb 的唯一消费者是 ResnetBlock3D(motion_module 收了不用),那里按 shape 分派广播。
+        _B, _F = sample.shape[0], sample.shape[2]
+        if timesteps.numel() == _B * _F and _B * _F != _B:
+            timesteps = timesteps.reshape(-1)                       # [B*F],b 在外
+        else:
+            # broadcast to batch dimension in a way that's compatible with ONNX/Core ML
+            timesteps = timesteps.expand(_B)
 
         t_emb = self.time_proj(timesteps)
 

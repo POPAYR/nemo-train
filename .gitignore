@@ -1,0 +1,20 @@
+
+# ==== 2026-09-28 双机工作流:仓库只放代码与文档,产物/数据/权重一律不进 git ====
+output/
+pretrained_weights/
+inbox/
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.bin
+*.mp4
+*.npy
+*.npz
+*.bak*
+__pycache__/
+*.pyc
+configs/paths/*.env
+!configs/paths/example.env
+!third_party/motar/global_motion_latent_stats.pt
+exps/_*

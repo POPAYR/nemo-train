@@ -1,0 +1,159 @@
+working_dir: /media/ps/ssd5/ayr/motar/dmdg_scheme2_smoke
+deepspeed_config_path: /media/ps/ssd5/ayr/x-nemo-inference/configs/ds_config_smoke.json
+resume_path: null
+resume_ar_path: null
+inference_config: /media/ps/ssd5/ayr/x-nemo-inference/configs/inference/inference_xnemo_stage2.yaml
+generate_returns_normalized: false
+adv_grad_off: false
+disable_video_path: false
+use_compile: false
+pretrained_base_model_path: /media/ps/ssd5/ayr/pretrained/sd-image-variations-diffusers
+text_encoder_path: /media/ps/ssd5/ayr/pretrained/umt5-base
+audio_encoder_path: /media/ps/ssd5/ayr/pretrained/wav2vec2-base-960h
+pretrained_motion_predictor_path: /media/ps/ssd5/ayr/motar/ar_train_output_depth12_diffdepth4_gan/20260615_164806_sf_gan_v32/checkpoints/sf_gan_step_5000.pt
+vae_path: /media/ps/ssd5/ayr/pretrained/stable-video-diffusion-img2vid/vae
+image_encoder_path: /media/ps/ssd5/ayr/pretrained/sd-image-variations-diffusers/image_encoder
+denoising_unet_path: /media/ps/ssd5/ayr/pretrained/xnemo_ckpt/xnemo_denoising_unet.pth
+temporal_module_path: /media/ps/ssd5/ayr/pretrained/xnemo_ckpt/xnemo_temporal_module.pth
+motion_encoder_path: /media/ps/ssd5/ayr/pretrained/xnemo_ckpt/xnemo_motion_encoder.pth
+model:
+  motion_dim: 512
+  depth: 12
+  heads: 8
+  dim_head: 64
+  diffloss_dim: 512
+  diffloss_depth: 4
+  num_sampling_steps: 1
+data:
+  tokenizer_path: /media/ps/ssd5/ayr/pretrained/umt5-base
+  data_stats_path: /media/ps/ssd5/ayr/motar/global_motion_latent_stats.pt
+  frames: 32
+  fps: 25
+  sr: 16000
+  text_max_len: 128
+  window_frames: 5
+  batch_size: 1
+  num_workers: 2
+  prefetch_factor: 3
+  sources:
+  - pose_dir: /media/ps/ssd4/ayr/hallo3_frames_512/pose_embed
+    audio_dir: /media/ps/ssd4/ayr/hallo3_frames_512/audio_pt
+    caption_dir: /media/ps/ssd4/ayr/hallo3_frames_512/emo_pose_caption
+    latent_dir: /media/ps/ssd4/ayr/hallo3_frames_512/frame_latent
+    video_dir: /media/ps/ssd4/ayr/hallo3_frames_512/face_frames
+    data_name_path: /media/ps/ssd4/ayr/hallo3_frames_512/train_data.txt
+  - pose_dir: /media/ps/ssd5/ayr/MEAD_frames_512_25fps/pose_embed
+    audio_dir: /media/ps/ssd5/ayr/MEAD_frames_512_25fps/audio_pt
+    caption_dir: /media/ps/ssd5/ayr/MEAD_frames_512_25fps/emo_pose_caption
+    latent_dir: /media/ps/ssd5/ayr/MEAD_frames_512_25fps/frame_latent
+    video_dir: /media/ps/ssd5/ayr/MEAD_frames_512_25fps/face_frames
+    data_name_path: /media/ps/ssd5/ayr/MEAD_frames_512_25fps/data.txt
+loss:
+  lambda_video: 0.0
+  lambda_reg: 2.0
+  lambda_adv:
+    keypoints:
+    - - 500
+      - 0.0
+    - - 2500
+      - 0.05
+    - - 200000
+      - 0.05
+  reg_kind: mse
+  mouth_mode: region
+  mouth_gain: 3.0
+  mouth_region:
+  - 0.55
+  - 0.92
+  - 0.28
+  - 0.72
+  sigma_mode: standard
+  sigma_p_mean: 0.0
+  sigma_p_std: 1.0
+gan:
+  enabled: false
+  d_dim: 384
+  d_heads: 6
+  d_dim_head: 64
+  d_depth: 4
+  window_size: 8
+  cond_drop_p: 0.1
+  use_spectral_norm: true
+  disc_inst_norm: false
+  disc_ckpt: /media/ps/ssd5/ayr/motar/ar_train_output_depth12_diffdepth4_gan/20260615_164806_sf_gan_v32/checkpoints/sf_gan_step_5000.pt
+  disc_warmed_ckpt: /media/ps/ssd5/ayr/motar/ar_train_output_depth12_diffdepth4_gan/20260615_164806_sf_gan_v32/checkpoints/sf_gan_step_5000.pt
+  w_win: 0.5
+  d_grad_clip: 10.0
+  d_warmup_steps: 2000
+  dwarm_min_steps: 200
+  dwarm_gap_target: 1.5
+  dwarm_ema_alpha: 0.05
+  d_warmup_lr_boost: 5.0
+  disc_lr: 2.0e-05
+  d_post_warmup_anneal: 0
+  d_ratio: 1
+  adv_gap_floor: 0.1
+  adv_soft_steps: 400
+  warmup_batch_size: 16
+  warmup_num_workers: 8
+  r1_gamma: 0.0
+  r1_every: 16
+vae_scale: 0.18215
+motion_token_shape:
+- 32
+- 16
+gradient_accumulation_steps: 1
+training:
+  num_epochs: 1
+  log_interval: 1
+  vis_interval: 0
+  save_interval: 3
+  save_lr_state: true
+  cfg_drop_prob: 0.15
+  denoising_train_modules: []
+  keep_last: 2
+visualisation:
+  num_inference_steps: 35
+  guidance_scale: 2.5
+  ar_sampling_steps: 1
+  ar_cfg_audio: 4.0
+  ar_cfg_text: 2.0
+  height: 512
+  width: 512
+  chunk_frames: 128
+  context_frames: 24
+  context_overlap: 4
+  max_frames: 150
+  fps: 25
+  render_gt: true
+  val_samples:
+  - name: hallo_sample_1
+    ref_image_path: /media/ps/ssd4/ayr/hallo3_test/2/face_frames/000000.jpg
+    motion_emb_path: /media/ps/ssd4/ayr/hallo3_test/2/pose_embed/674d6073b63f5cb5bf4460f96639cd01.pt
+    audio_path: /media/ps/ssd4/ayr/hallo3_test/2/audio_wav/674d6073b63f5cb5bf4460f96639cd01.wav
+    caption: /media/ps/ssd4/ayr/hallo3_test/2/emo_pose_caption/674d6073b63f5cb5bf4460f96639cd01.json
+  - name: hallo_sample_2
+    ref_image_path: /media/ps/ssd4/ayr/hallo3_test/3/face_frames/000000.jpg
+    motion_emb_path: /media/ps/ssd4/ayr/hallo3_test/3/pose_embed/18d4eca28686805d994df1244cae20d6.pt
+    audio_path: /media/ps/ssd4/ayr/hallo3_test/3/audio_wav/18d4eca28686805d994df1244cae20d6.wav
+    caption: /media/ps/ssd4/ayr/hallo3_test/3/emo_pose_caption/18d4eca28686805d994df1244cae20d6.json
+  - name: hallo_sample_3
+    ref_image_path: /media/ps/ssd4/ayr/hallo3_test/5/face_frames/000000.jpg
+    motion_emb_path: /media/ps/ssd4/ayr/hallo3_test/5/pose_embed/465750e4e27642c8705e670e05511e1e.pt
+    audio_path: /media/ps/ssd4/ayr/hallo3_test/5/audio_wav/465750e4e27642c8705e670e05511e1e.wav
+    caption: /media/ps/ssd4/ayr/hallo3_test/5/emo_pose_caption/465750e4e27642c8705e670e05511e1e.json
+dmd_g:
+  render_ckpt: /media/ps/ssd5/ayr/x-nemo-inference/output/dmd2_win24_0701/ckpt/dmd2_step_26000.pt
+  w_dmd: 1.0
+  lam_mse: 0.05
+  window: 24
+  block_size: 8
+  dsl:
+  - 999
+  - 749
+  - 499
+  - 249
+  critic_lr: 4.0e-07
+  critic_wd: 0.01
+  critic_grad_clip: 10.0
+  refonly_ckpt: /media/ps/ssd5/ayr/motar/refonly_score_output/refonly_v1_negmot/ckpt/refonly_step_6000.pt

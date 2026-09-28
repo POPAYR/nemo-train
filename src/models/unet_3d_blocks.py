@@ -371,7 +371,8 @@ class UNetMidBlock3DCrossAttn(nn.Module):
                 hidden_states = attn(
                     hidden_states,
                     encoder_hidden_states=encoder_hidden_states,
-                ).sample
+                    return_dict=False,
+                )[0]  # 避免构造 BaseOutput → 消除 torch.compile graph break（与 .sample 数值等价）
                 hidden_states = (
                     motion_module(
                         hidden_states, temb, encoder_hidden_states=motion_hidden_states
@@ -578,7 +579,8 @@ class CrossAttnDownBlock3D(nn.Module):
                 hidden_states = attn(
                     hidden_states,
                     encoder_hidden_states=encoder_hidden_states,
-                ).sample
+                    return_dict=False,
+                )[0]  # 避免构造 BaseOutput → 消除 torch.compile graph break（与 .sample 数值等价）
 
                 # add motion module
                 hidden_states = (
@@ -943,7 +945,8 @@ class CrossAttnUpBlock3D(nn.Module):
                 hidden_states = attn(
                     hidden_states,
                     encoder_hidden_states=encoder_hidden_states,
-                ).sample
+                    return_dict=False,
+                )[0]  # 避免构造 BaseOutput → 消除 torch.compile graph break（与 .sample 数值等价）
 
                 # add motion module
                 hidden_states = (

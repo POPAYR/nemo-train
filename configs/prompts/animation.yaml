@@ -1,12 +1,12 @@
-pretrained_base_model_path: 'pretrained_weights/sd-image-variations-diffusers'
-image_encoder_path: 'pretrained_weights/sd-image-variations-diffusers/image_encoder'
-vae_path: 'pretrained_weights/stable-video-diffusion-img2vid-xt/vae'
+pretrained_base_model_path: '/media/ps/ssd5/ayr/pretrained/sd-image-variations-diffusers'
+image_encoder_path: '/media/ps/ssd5/ayr/pretrained/sd-image-variations-diffusers/image_encoder'
+vae_path: '/media/ps/ssd5/ayr/pretrained/stable-video-diffusion-img2vid-xt/vae'
 
-denoising_unet_path: "pretrained_weights/xnemo_denoising_unet.pth"
-temporal_module_path: "pretrained_weights/xnemo_temporal_module.pth"
+denoising_unet_path: "/media/ps/ssd5/ayr/pretrained/xnemo_ckpt/xnemo_denoising_unet.pth"
+temporal_module_path: "/media/ps/ssd5/ayr/pretrained/xnemo_ckpt/xnemo_temporal_module.pth"
 
 inference_config: "configs/inference/inference_xnemo_stage2.yaml"
-weight_dtype: 'fp16'
+weight_dtype: 'bf16'
 
 test_cases:
   'demo/ref_image.png':
