@@ -17,10 +17,22 @@
 
 ## 一、首次部署（实验机，只做一次）
 
-### 1. 拉代码
+### 1. 拉代码（私有仓库，用只读 Deploy key）
 ```bash
-git clone <你的私有仓库地址> x-nemo-inference && cd x-nemo-inference
+ssh-keygen -t ed25519 -f ~/.ssh/motar_deploy -N ""   # 在实验机上生成
+cat ~/.ssh/motar_deploy.pub                          # 复制这行公钥
 ```
+GitHub 仓库 `POPAYR/Motar` → Settings → Deploy keys → Add deploy key，粘贴公钥，**不要勾选** Allow write access。
+```bash
+cat >> ~/.ssh/config <<'CFG'
+Host github-motar
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/motar_deploy
+CFG
+git clone github-motar:POPAYR/Motar.git x-nemo-inference && cd x-nemo-inference
+```
+公司网络只能走 HTTPS 时，改用只读的 fine-grained token：`git clone https://<token>@github.com/POPAYR/Motar.git`。
 
 ### 2. 装环境（Python 3.9，CUDA 11.8）
 ```bash
@@ -36,11 +48,21 @@ insightface 首次运行会下载 `buffalo_l` 模型到 `~/.insightface/models/`
 
 **只搬原始数据**。帧、latent、motion latent 共 219G，在实验机上重新生成。
 
-**开发机**上把要搬的东西按目标布局拷到移动硬盘或中转位置（rsync，可断点续传）：
+**开发机**上整理并切成 4G 分卷，附带 sha256 校验和：
 ```bash
-bash tools/make_transfer_list.sh --dry /mnt/移动硬盘/xnemo     # 先看各组大小
-bash tools/make_transfer_list.sh       /mnt/移动硬盘/xnemo     # 实际拷贝
+bash tools/pack_transfer.sh /media/ps/ssd5/ayr/xnemo_transfer     # 产出 chunks/:约 16 个分卷 + SHA256SUMS + unpack_data.sh
 ```
+把 `chunks/` 整个目录传到实验机，下面三种方式任选一种：
+- **网盘或对象存储中转**（实验机能访问外网时最省事）：这台上传 `chunks/*`，那台下载。
+- **你的电脑中转**：`rsync -avP 开发机:/media/ps/ssd5/ayr/xnemo_transfer/chunks/ ./chunks/`，再 `rsync -avP ./chunks/ 实验机:~/xnemo_chunks/`。两段都能断点续传。
+- **移动硬盘**：直接拷 `chunks/`。
+
+**实验机**上校验并解压（有损坏的分卷会列出来，只重传那几个即可）：
+```bash
+bash ~/xnemo_chunks/unpack_data.sh ~/xnemo_chunks /data/xnemo     # 解压完会打印要填进路径配置的几行
+```
+
+解压后的目录与对应变量：
 
 | 目录 | 内容 | 大小 | 对应变量 |
 |---|---|---|---|
