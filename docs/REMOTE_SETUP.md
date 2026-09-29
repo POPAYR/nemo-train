@@ -52,8 +52,17 @@ insightface 首次运行会下载 `buffalo_l` 模型到 `~/.insightface/models/`
 ```bash
 bash tools/pack_transfer.sh /media/ps/ssd5/ayr/xnemo_transfer     # 产出 chunks/:约 16 个分卷 + SHA256SUMS + unpack_data.sh
 ```
-把 `chunks/` 整个目录传到实验机，下面三种方式任选一种：
-- **网盘或对象存储中转**（实验机能访问外网时最省事）：这台上传 `chunks/*`，那台下载。
+把 `chunks/` 整个目录传到实验机。**已采用阿里云 OSS**：分卷已上传到 `oss://yanruan-avatar/xnemo/transfer_20260928/`（上海地域，含 `SHA256SUMS` 和 `unpack_data.sh`）。
+
+实验机上一条命令完成下载、校验、解压：
+```bash
+# 1) 装 ossutil 2.x 并配置凭证(建议用只读 RAM 子账号的 AccessKey,只授权该 bucket 的读权限)
+#    下载:https://help.aliyun.com/zh/oss/developer-reference/ossutil-overview
+ossutil config            # region 填 cn-shanghai;若实验机在阿里云上海内网,endpoint 用 oss-cn-shanghai-internal.aliyuncs.com
+# 2) 下载 + 校验 + 解压(可断点续传)
+bash remote/fetch_from_oss.sh ~/xnemo_chunks /data/xnemo
+```
+备选方式：
 - **你的电脑中转**：`rsync -avP 开发机:/media/ps/ssd5/ayr/xnemo_transfer/chunks/ ./chunks/`，再 `rsync -avP ./chunks/ 实验机:~/xnemo_chunks/`。两段都能断点续传。
 - **移动硬盘**：直接拷 `chunks/`。
 
