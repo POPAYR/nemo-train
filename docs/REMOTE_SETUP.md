@@ -22,7 +22,7 @@
 ssh-keygen -t ed25519 -f ~/.ssh/motar_deploy -N ""   # 在实验机上生成
 cat ~/.ssh/motar_deploy.pub                          # 复制这行公钥
 ```
-GitHub 仓库 `POPAYR/Motar` → Settings → Deploy keys → Add deploy key，粘贴公钥，**不要勾选** Allow write access。
+GitHub 仓库 `POPAYR/nemo-train` → Settings → Deploy keys → Add deploy key，粘贴公钥，**不要勾选** Allow write access。
 ```bash
 cat >> ~/.ssh/config <<'CFG'
 Host github-motar
@@ -30,9 +30,9 @@ Host github-motar
   User git
   IdentityFile ~/.ssh/motar_deploy
 CFG
-git clone github-motar:POPAYR/Motar.git x-nemo-inference && cd x-nemo-inference
+git clone github-motar:POPAYR/nemo-train.git x-nemo-inference && cd x-nemo-inference
 ```
-公司网络只能走 HTTPS 时，改用只读的 fine-grained token：`git clone https://<token>@github.com/POPAYR/Motar.git`。
+公司网络只能走 HTTPS 时，改用只读的 fine-grained token：`git clone https://<token>@github.com/POPAYR/nemo-train.git`。
 
 ### 2. 装环境（Python 3.9，CUDA 11.8）
 ```bash
