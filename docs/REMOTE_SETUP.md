@@ -54,14 +54,21 @@ bash tools/pack_transfer.sh /media/ps/ssd5/ayr/xnemo_transfer     # 产出 chunk
 ```
 把 `chunks/` 整个目录传到实验机。**已采用阿里云 OSS**：分卷已上传到 `oss://yanruan-avatar/xnemo/transfer_20260928/`（上海地域，含 `SHA256SUMS` 和 `unpack_data.sh`）。
 
-实验机上一条命令完成下载、校验、解压：
+**方式 1（推荐）：签名链接 + wget**。实验机不用装 ossutil，也不用存 AccessKey。
+1. 开发机上已生成 `/media/ps/ssd5/ayr/xnemo_transfer/download_urls.txt`（17 行，**7 天有效**）。
+   链接带签名，相当于临时密码，**不进 git**。把这个文件复制到实验机（17 行文本，直接复制粘贴也行）。
+   过期了找 Claude 重新生成。
+2. 实验机上一条命令完成下载、校验、解压（可断点续传，中断后重跑同一命令即可）：
+   ```bash
+   bash remote/download_from_urls.sh download_urls.txt ~/xnemo_chunks /data/xnemo
+   ```
+
+**方式 2：ossutil**（适合长期使用，或链接过期时）：
 ```bash
-# 1) 装 ossutil 2.x 并配置凭证(建议用只读 RAM 子账号的 AccessKey,只授权该 bucket 的读权限)
-#    下载:https://help.aliyun.com/zh/oss/developer-reference/ossutil-overview
-ossutil config            # region 填 cn-shanghai;若实验机在阿里云上海内网,endpoint 用 oss-cn-shanghai-internal.aliyuncs.com
-# 2) 下载 + 校验 + 解压(可断点续传)
+ossutil config            # region 填 cn-shanghai;建议用只读 RAM 子账号 AccessKey;在阿里云上海内网可用 oss-cn-shanghai-internal.aliyuncs.com
 bash remote/fetch_from_oss.sh ~/xnemo_chunks /data/xnemo
 ```
+
 备选方式：
 - **你的电脑中转**：`rsync -avP 开发机:/media/ps/ssd5/ayr/xnemo_transfer/chunks/ ./chunks/`，再 `rsync -avP ./chunks/ 实验机:~/xnemo_chunks/`。两段都能断点续传。
 - **移动硬盘**：直接拷 `chunks/`。
